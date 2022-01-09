@@ -1,0 +1,238 @@
+<template>
+    <!-- <Head title="List Lelalang -  Pengadaan Barang & Jasa" /> -->
+    <app-layout title="Sistem Informasi Pengadaan Barang & Jasa">
+        <main class="flex w-full h-screen">
+            <SidebarPBJ />
+            <section class="w-full p-4">
+                <div class="w-full h-screen p-4 text-md">
+                    <h1 class="font-bold text-3xl text-center border-b-2 border-red-500">Daftar Penawaran Lelang Pengadaan Barang & Jasa dari Vendor</h1>
+
+                    <div class="relative overflow-x-auto">
+                        <!-- Notification -->
+                        <div v-if="isNotificationfailed" class="flex bg-red-100 rounded-lg p-4 mb-4 text-sm text-red-700" role="alert">
+                            <svg class="w-5 h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                            <div>
+                                <span class="font-medium">Gagal!</span> Proses Approval
+                            </div>
+                        </div>
+                        <div v-if="isNotifSuccess" class="flex bg-green-100 rounded-lg p-4 mb-4 text-sm text-green-700" role="alert">
+                            <svg class="w-5 h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                            <div>
+                                <span class="font-medium">Berhasil!</span> Proses Approval
+                            </div>
+                        </div>
+                    </div>
+
+                    <select name="perPage" id="perPage" class="m-4 rounded-lg" v-model="page" @change="search">
+                        <option v-for="item in listPage" :value="item" >{{item}}</option>
+                    </select>
+
+                    <input type="text" name="table_search" class="form-control float-right m-4 rounded-lg" placeholder="Search" v-model="term" @keyup="search">
+                    <div class="relative max-h-96 max-w-screen-lg overflow-auto">
+                        <table class="table table-auto w-full mt-4">
+                        <thead>
+                            <tr>
+                                <HeaderTable :color="color" :headCols="listCols" />
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in listData.data" :key="item.id">
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">{{ item.id }}</td> 
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">{{ item.nama_lengkap }}</td>
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">{{ item.tempat_lahir }}</td>
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">{{ item.tanggal_lahir }}</td>
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">{{ item.nama_badan_usaha }}</td>
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">{{ item.alamat_badan_usaha }}</td>
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">{{ item.nomor_hp }}</td>
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">{{ item.email }}</td>
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">{{ item.alamat_web }}</td>
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">
+                                <div class="flex space-x-2">
+                                    <div class="item">
+                                        <jet-danger-button type="button" @click="deleteAction(item.id)">
+                                            Hapus
+                                        </jet-danger-button>
+                                    </div>
+                                    <div class="item">
+                                        <jet-button type="button" @click="cetak(item)">
+                                            Cetak
+                                        </jet-button>
+                                    </div>
+                                    <div class="item">
+                                        <a :href="'http://127.0.0.1:8000/storage/'+item.surat_penawaran" target="_blank">
+                                            <jet-button type="button">
+                                                Unduh
+                                            </jet-button>
+                                        </a>
+                                    </div>
+                                </div>      
+                            </td>
+                            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs p-4">
+                                <div class="flex space-x-2">
+                                    <div class="item">
+                                        <jet-button type="button" @click="processApp(item.id, 'Sesuai')">
+                                            Sesuai
+                                        </jet-button>
+                                    </div>
+                                    <div class="item">
+                                        <jet-danger-button type="button" @click="processApp(item.id, 'Tidak Sesuai')">
+                                            Tidak Sesuai
+                                        </jet-danger-button>
+                                    </div>
+                                </div>
+                            </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                    
+                    <pagination class="mt-6 float-right" :links="listData.links" :perPage="page" :searchStr="term" />
+                </div>
+            </section>
+        </main>
+    </app-layout>
+    <Footer />
+</template>
+
+<script>
+import { defineComponent } from 'vue'
+import { Head, Link } from '@inertiajs/inertia-vue3';
+import axios from 'axios'
+
+import AppLayout from '@/Layouts/AppLayout.vue'
+import SidebarPBJ from '@/Components/SidebarPBJ.vue';
+import JetButton from '@/Jetstream/Button.vue'
+import JetDangerButton from '@/Jetstream/DangerButton.vue'
+import Footer from '@/Components/Footer.vue';
+import Pagination from '@/Components/Pagination.vue'
+import HeaderTable from '@/Components/HeaderTable.vue'
+
+import pdfMake from 'pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+import htmlToPdfmake from 'html-to-pdfmake';
+
+export default defineComponent({
+    components: {
+        Head,
+        Link,
+        AppLayout,
+        SidebarPBJ,
+        JetButton,
+        JetDangerButton,
+        Footer,
+        Pagination,
+        HeaderTable,
+        pdfMake,
+        pdfFonts,
+        htmlToPdfmake
+    },
+    props: {
+        listData: Object,
+        perPagePrm: Number,
+        termPrm:  String
+    },
+    created() {
+        console.log(this.inventList)
+    },
+    data() {
+        return {
+            color:  "light",
+            term: this.termPrm !=  null ? this.termPrm :  '',
+            page: this.perPagePrm != null ? this.perPagePrm : 10,
+            listPage: [5, 10, 15, 20, 30, 50, 100],
+            listCols: ['No', 'Nama Lengkap', 'Tempat Lahir', 'Tanggal Lahir', 'Nama Badan Usaha', 'Alamat Badan Usaha', 'No HP', 'Email', 'Alamat Website','Opsi', 'Action'],
+            mesageApproval: '',
+            isViewNotif: false,
+            isNotifSuccess: false,
+            isNotificationfailed: false,
+        }
+    },
+    methods: {
+        search() {
+            this.$inertia.replace(this.route('listInvent', {term: this.term, perPage: this.page}))
+        },
+        deleteAction(id){
+            if (confirm('Apakah Anda Yakin Untuk Menghapus Usulan Ini?')) {
+                this.$inertia.delete(`/PBJ/delete/${id}`)
+            }
+        },
+        processApp(id, status){
+            let txtConfirm = status == 'Sesuai' ? 'Menyatakan Sesuai' : 'Menyatakan Tidak Sesuai';
+            if (confirm(`Apakah Anda Yakin Untuk ${txtConfirm} Usulan Ini?`)) {
+                axios.post(this.route('PBJ.penawaran.approval'), {
+                    id: id,
+                    status: status
+                }).then((res) => {
+                    this.mesageApproval = res.data.message;
+                    this.isNotifSuccess = res.data.status == "success" ? true : false;
+                    this.isNotificationfailed = res.data.status == "failed" ? true : false;
+
+                    setTimeout(() => {
+                        this.mesageApproval = "";
+                        this.isNotifSuccess = false;
+                        this.isNotificationfailed = false;
+                    }, 20000);
+                })
+            }
+        },
+        cetak(items){
+            var html = htmlToPdfmake(`
+                    <h2 style="text-align: center; font-size: 36px; margin-bottom: 10px;"><b>Penawaran Barang & Jasa</b></h2>
+                    <hr/>
+                    <div class="with-margin">
+                        <table style="border: none !important;">
+                            <tr>
+                                <th style="width:200px; margin: 20px;">Nama Lengkap</th>
+                                <th style="width:200px; margin: 20px; text-align: center">${items.nama_lengkap}</th>
+                            </tr>
+                            <tr>
+                                <th style="width:200px; margin: 20px;">Tempat Lahir</th>
+                                <th style="width:200px; margin: 20px; text-align: center">${items.tempat_lahir}</th>
+                            </tr>
+                            <tr>
+                                <th style="width:200px; margin: 20px;">Tanggal Lahir</th>
+                                <th style="width:200px; margin: 20px; text-align: center">${items.tanggal_lahir}</th>
+                            </tr>
+                            <tr>
+                                <th style="width:200px; margin: 20px;">Nama Badan Usaha</th>
+                                <th style="width:200px; margin: 20px; text-align: center">${items.nama_badan_usaha}</th>
+                            </tr>
+                            <tr>
+                                <th style="width:200px; margin: 20px;">Alamat Badan Usaha</th>
+                                <th style="width:200px; margin: 20px; text-align: center">${items.alamat_badan_usaha}</th>
+                            </tr>
+                            <tr>
+                                <th style="width:200px; margin: 20px;">No HP</th>
+                                <th style="width:200px; margin: 20px; text-align: center">${items.nomor_hp}</th>
+                            </tr>
+                            <tr>
+                                <th style="width:200px; margin: 20px;">Email</th>
+                                <th style="width:200px; margin: 20px; text-align: center">${items.email}</th>
+                            </tr>
+                            <tr>
+                                <th style="width:200px; margin: 20px;">Alamat Web</th>
+                                <th style="width:200px; margin: 20px; text-align: center">${items.alamat_web}</th>
+                            </tr>
+                        </table>
+                    </div>
+                `);
+            
+            const documentDefinition = { 
+                content: html,
+                styles:{
+                    red:{ // we define the class called "red"
+                        color:'red'
+                    },
+                    'with-margin':{
+                        marginLeft: 120
+                    }
+                },
+                tableAutoSize: true,
+                margin: [0, 5, 0, 10],
+            };
+            pdfMake.vfs = pdfFonts.pdfMake.vfs;
+            pdfMake.createPdf(documentDefinition).open();   
+        }
+    }
+})
+</script>
