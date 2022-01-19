@@ -26,19 +26,25 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('/prosedur', function () {
-    return Inertia::render('Prosedur', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-    ]);
-});
+// Route::get('/prosedur', function () {
+//     return Inertia::render('Prosedur', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => Route::has('register'),
+//         'content' => [\App\Http\Controllers\Admin\CmsController::class, 'getContent/Prosedur']
+//     ]);
+// });
 
-Route::get('/ketentuan', function () {
-    return Inertia::render('Ketentuan', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-    ]);
-});
+// Route::get('/ketentuan', function () {
+//     return Inertia::render('Ketentuan', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => Route::has('register'),
+//     ]);
+// });
+
+Route::get('/prosedur', [\App\Http\Controllers\Admin\CmsController::class, 'getContentProsedure'])->name('prosedur');
+Route::get('/ketentuan', [\App\Http\Controllers\Admin\CmsController::class, 'getContentKetentuan'])->name('ketentuan');
+
+
 Route::get('listInvent', [DaftarBarangController::class, 'index'])
     ->middleware('guest')->name('listInvent');
 
@@ -99,5 +105,20 @@ Route::group(['middleware' => 'auth'], function() {
         Route::post('users_create', [\App\Http\Controllers\Admin\AdminController::class, 'createUsers'])->name('users.store');
         Route::put('users_update/{id?}', [\App\Http\Controllers\Admin\AdminController::class, 'updateUsers'])->name('users.update');
         Route::delete('users_delete/{id?}', [\App\Http\Controllers\Admin\AdminController::class, 'deleteUsers'])->name('users.delete');
+
+        Route::get('inventory', [DaftarBarangController::class, 'index'])->name('inventory.index');
+        Route::get('inventory/create', [DaftarBarangController::class, 'create'])->name('inventory.create');
+        Route::post('inventory/store', [DaftarBarangController::class, 'store'])->name('inventory.store');
+        Route::get('inventory/edit/{id?}', [DaftarBarangController::class, 'edit'])->name('inventory.edit');
+        Route::put('inventory/update/{id?}', [DaftarBarangController::class, 'update'])->name('inventory.update');
+        Route::delete('inventory/delete/{id?}', [DaftarBarangController::class, 'destroy'])->name('inventory.delete');
+
+        Route::get('cms', [\App\Http\Controllers\Admin\CmsController::class, 'index'])->name('cms.index');
+        Route::get('cms/create', [\App\Http\Controllers\Admin\CmsController::class, 'create'])->name('cms.create');
+        Route::post('cms/store', [\App\Http\Controllers\Admin\CmsController::class, 'store'])->name('cms.store');
+        Route::get('cms/edit/{id?}', [\App\Http\Controllers\Admin\CmsController::class, 'edit'])->name('cms.edit');
+        Route::put('cms/update/{id?}', [\App\Http\Controllers\Admin\CmsController::class, 'update'])->name('cms.update');
+        Route::get('cms/delete/{id?}', [\App\Http\Controllers\Admin\CmsController::class, 'destroy'])->name('cms.delete');
+        Route::post('cms/upload', [\App\Http\Controllers\Admin\CmsController::class, 'uploadQuill'])->name('cms.upload');
     });
 });
