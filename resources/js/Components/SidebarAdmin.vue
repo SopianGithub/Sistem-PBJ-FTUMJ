@@ -29,18 +29,12 @@
                             <button class="flex w-full justify-between py-2 px-2">
                                 <span> Kelola Sistem Web </span>
                             </button>
-                            <div class="px-4 bg-gray-900 h-0 overflow-hidden group-hover:h-full transition-height hover:bg-gray-700 hover:text-blue-300">
-                                Home
-                            </div>
-                            <div class="px-4 bg-gray-900 h-0 overflow-hidden group-hover:h-full transition-height hover:bg-gray-700 hover:text-blue-300">
-                                Prosedur
-                            </div>
-                            <div class="px-4 bg-gray-900 h-0 overflow-hidden group-hover:h-full transition-height hover:bg-gray-700 hover:text-blue-300">
-                                Daftar Barang
-                            </div>
-                            <div class="px-4 bg-gray-900 h-0 overflow-hidden group-hover:h-full transition-height hover:bg-gray-700 hover:text-blue-300">
-                                Daftar Supplier
-                            </div>
+                            <Link :href="route('Admin.cms.index')">
+                                <div class="px-4 bg-gray-900 h-0 overflow-hidden group-hover:h-full transition-height hover:bg-gray-700 hover:text-blue-300">CMS</div>
+                            </Link>
+                            <Link :href="route('Admin.inventory.index')">
+                                <div class="px-4 bg-gray-900 h-0 overflow-hidden group-hover:h-full transition-height hover:bg-gray-700 hover:text-blue-300">Daftar Barang</div>
+                            </Link>
                         </li>
                     </ul>
                 </div>
